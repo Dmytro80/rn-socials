@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Dimensions,
 } from "react-native";
 
 const initialState = {
@@ -27,6 +28,19 @@ export default function RegistrationScreen() {
   const [isShowPassword, setIsShowPassword] = useState(true);
   const [isShowKeybord, setIsShowKeybord] = useState(false);
   const [focus, setFocus] = useState(initialFocusState);
+  const [dimensions, setDimensions] = useState(
+    Dimensions.get("window").width - 16 * 2
+  );
+
+  useEffect(() => {
+    const onChange = () => {
+      const width = Dimensions.get("window").width - 16 * 2;
+      setDimensions(width);
+    };
+    const subscription = Dimensions.addEventListener("change", onChange);
+
+    return () => subscription?.remove();
+  }, []);
 
   const keyboardHide = () => {
     setIsShowKeybord(false);
@@ -54,7 +68,11 @@ export default function RegistrationScreen() {
           <View style={styles.box}>
             <Text style={styles.title}>Регистрация</Text>
             <View
-              style={{ ...styles.form, marginBottom: isShowKeybord ? 205 : 92 }}
+              style={{
+                ...styles.form,
+                marginBottom: isShowKeybord ? 205 : 92,
+                width: dimensions,
+              }}
             >
               <TextInput
                 style={{
@@ -142,6 +160,7 @@ const styles = StyleSheet.create({
   },
   box: {
     justifyContent: "flex-start",
+    alignItems: "center",
     backgroundColor: "#fff",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
