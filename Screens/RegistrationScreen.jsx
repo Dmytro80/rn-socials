@@ -66,6 +66,11 @@ export default function RegistrationScreen() {
           source={require("../assets/images/photo-bg.jpg")}
         >
           <View style={styles.box}>
+            <View style={styles.avatarBox}>
+              <TouchableOpacity style={styles.avatarBtn} activeOpacity={0.7}>
+                <Text style={styles.avatarBtnText}>+</Text>
+              </TouchableOpacity>
+            </View>
             <Text style={styles.title}>Регистрация</Text>
             <View
               style={{
@@ -159,11 +164,38 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   box: {
+    position: "relative",
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "#fff",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
+  },
+  avatarBox: {
+    position: "absolute",
+    top: -60,
+    width: 120,
+    height: 120,
+    backgroundColor: "#F6F6F6",
+    borderRadius: 16,
+  },
+  avatarBtn: {
+    position: "absolute",
+    right: -13,
+    bottom: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 26,
+    height: 26,
+    backgroundColor: "#FFFFFF",
+    borderRadius: "50%",
+    borderWidth: 1,
+    borderColor: "#FF6C00",
+    color: "FF6C00",
+  },
+  avatarBtnText: {
+    color: "#FF6C00",
+    fontSize: 18,
   },
   form: {
     marginTop: 32,
