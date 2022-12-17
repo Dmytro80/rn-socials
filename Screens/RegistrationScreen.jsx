@@ -5,48 +5,128 @@ import {
   ImageBackground,
   Text,
   TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
+const initialState = {
+  login: "",
+  email: "",
+  password: "",
+};
+
+const initialFocusState = {
+  login: false,
+  email: false,
+  password: false,
+};
+
 export default function RegistrationScreen() {
+  const [state, setState] = useState(initialState);
   const [isShowPassword, setIsShowPassword] = useState(true);
+  const [isShowKeybord, setIsShowKeybord] = useState(false);
+  const [focus, setFocus] = useState(initialFocusState);
+
+  const keyboardHide = () => {
+    setIsShowKeybord(false);
+    Keyboard.dismiss();
+  };
+
+  const handlerSubmit = () => {
+    console.log(state);
+    keyboardHide();
+    setState(initialState);
+  };
+
+  const handlerFocus = (nameInput) => {
+    setIsShowKeybord(true);
+    setFocus((prevState) => ({ ...prevState, [nameInput]: true }));
+  };
+
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        style={styles.image}
-        source={require("../assets/images/photo-bg.jpg")}
-      >
-        <View style={styles.box}>
-          <Text style={styles.title}>Регистрация</Text>
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              placeholder="Логин"
-              placeholderTextColor="#BDBDBD"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Адрес электронной почты"
-              placeholderTextColor="#BDBDBD"
-            />
-            <View style={{ marginBottom: 43, position: "relative" }}>
+    <TouchableWithoutFeedback onPress={keyboardHide}>
+      <View style={styles.container}>
+        <ImageBackground
+          style={styles.image}
+          source={require("../assets/images/photo-bg.jpg")}
+        >
+          <View style={styles.box}>
+            <Text style={styles.title}>Регистрация</Text>
+            <View
+              style={{ ...styles.form, marginBottom: isShowKeybord ? 205 : 92 }}
+            >
               <TextInput
-                style={styles.input}
-                marginBottom={0}
-                placeholder="Пароль"
+                style={{
+                  ...styles.input,
+                  borderColor: focus.login ? "#FF6C00" : "#E8E8E8",
+                }}
+                value={state.login}
+                placeholder="Логин"
                 placeholderTextColor="#BDBDBD"
-                secureTextEntry={isShowPassword}
+                onFocus={() => handlerFocus("login")}
+                onBlur={() =>
+                  setFocus((prevState) => ({ ...prevState, login: false }))
+                }
+                onChangeText={(value) =>
+                  setState((prevState) => ({ ...prevState, login: value }))
+                }
               />
-              <Text
-                style={styles.inputBtn}
-                onPress={() => setIsShowPassword(false)}
+              <TextInput
+                style={{
+                  ...styles.input,
+                  borderColor: focus.email ? "#FF6C00" : "#E8E8E8",
+                }}
+                value={state.email}
+                placeholder="Адрес электронной почты"
+                placeholderTextColor="#BDBDBD"
+                onFocus={() => handlerFocus("email")}
+                onBlur={() =>
+                  setFocus((prevState) => ({ ...prevState, email: false }))
+                }
+                onChangeText={(value) =>
+                  setState((prevState) => ({ ...prevState, email: value }))
+                }
+              />
+              <View style={{ marginBottom: 43, position: "relative" }}>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    borderColor: focus.password ? "#FF6C00" : "#E8E8E8",
+                  }}
+                  value={state.password}
+                  marginBottom={0}
+                  placeholder="Пароль"
+                  placeholderTextColor="#BDBDBD"
+                  secureTextEntry={isShowPassword}
+                  onFocus={() => handlerFocus("password")}
+                  onBlur={() =>
+                    setFocus((prevState) => ({ ...prevState, password: false }))
+                  }
+                  onChangeText={(value) =>
+                    setState((prevState) => ({ ...prevState, password: value }))
+                  }
+                />
+                <Text
+                  style={styles.inputBtn}
+                  onPress={() => setIsShowPassword(false)}
+                >
+                  Показать
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.submitBtn}
+                activeOpacity={0.7}
+                onPress={handlerSubmit}
               >
-                Показать
-              </Text>
+                <Text style={styles.titleBtn}>Зарегистрироваться</Text>
+              </TouchableOpacity>
+              <Text style={styles.textLink}>Уже есть аккаунт? Войти</Text>
             </View>
           </View>
-        </View>
-      </ImageBackground>
-    </View>
+        </ImageBackground>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -67,7 +147,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
   },
   form: {
-    marginBottom: 92,
     marginTop: 32,
   },
   title: {
@@ -75,7 +154,7 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Medium",
     fontWeight: "500",
     fontSize: 30,
-    lineLeight: 35,
+    lineHeight: 35,
     textAlign: "center",
     letterSpacing: 0.01,
     color: "#212121",
@@ -91,7 +170,7 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
     fontWeight: "400",
     fontSize: 16,
-    lineLeight: 19,
+    lineHeight: 19,
   },
   inputBtn: {
     position: "absolute",
@@ -100,7 +179,30 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
     fontWeight: "400",
     fontSize: 16,
-    lineLeight: 19,
+    lineHeight: 19,
+    color: "#1B4371",
+  },
+  submitBtn: {
+    marginBottom: 16,
+    height: 51,
+    backgroundColor: "#FF6C00",
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  titleBtn: {
+    fontFamily: "Roboto-Regular",
+    fontWeight: "400",
+    fontSize: 16,
+    lineHeight: 19,
+    color: "#ffffff",
+  },
+  textLink: {
+    textAlign: "center",
+    fontFamily: "Roboto-Regular",
+    fontWeight: "400",
+    fontSize: 16,
+    lineHeight: 19,
     color: "#1B4371",
   },
 });
