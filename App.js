@@ -1,37 +1,30 @@
-import React, { useCallback } from "react";
-import { StyleSheet, View } from "react-native";
-import RegistrationScreen from "./Screens/RegistrationScreen.jsx";
-import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
+import React, { useState } from "react";
 
-SplashScreen.preventAutoHideAsync();
+import * as Font from "expo-font";
+import AppLoading from "expo-app-loading";
+import { useRouter } from "./router";
+import { NavigationContainer } from "@react-navigation/native";
 
-export default function App() {
-  const [fontsLoaded] = useFonts({
+const loadApplication = async () => {
+  await Font.loadAsync({
     "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
     "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
   });
+};
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+export default function App() {
+  const [isReady, setIsReady] = useState(false);
 
-  if (!fontsLoaded) {
-    return null;
+  const routing = useRouter(true);
+
+  if (!isReady) {
+    return (
+      <AppLoading
+        startAsync={loadApplication}
+        onFinish={() => setIsReady(true)}
+        onError={console.warn}
+      />
+    );
   }
-
-  return (
-    <View style={styles.container} onLayout={onLayoutRootView}>
-      <RegistrationScreen />
-    </View>
-  );
+  return <NavigationContainer>{routing}</NavigationContainer>;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-});

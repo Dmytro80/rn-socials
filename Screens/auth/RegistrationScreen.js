@@ -23,7 +23,7 @@ const initialFocusState = {
   password: false,
 };
 
-export default function RegistrationScreen() {
+export default function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
   const [isShowPassword, setIsShowPassword] = useState(true);
   const [isShowKeybord, setIsShowKeybord] = useState(false);
@@ -63,7 +63,7 @@ export default function RegistrationScreen() {
       <View style={styles.container}>
         <ImageBackground
           style={styles.image}
-          source={require("../assets/images/photo-bg.jpg")}
+          source={require("../../assets/images/photo-bg.jpg")}
         >
           <View style={styles.box}>
             <View style={styles.avatarBox}>
@@ -144,7 +144,12 @@ export default function RegistrationScreen() {
               >
                 <Text style={styles.titleBtn}>Зарегистрироваться</Text>
               </TouchableOpacity>
-              <Text style={styles.textLink}>Уже есть аккаунт? Войти</Text>
+              <Text
+                style={styles.textLink}
+                onPress={() => navigation.navigate("Login")}
+              >
+                Уже есть аккаунт? Войти
+              </Text>
             </View>
           </View>
         </ImageBackground>

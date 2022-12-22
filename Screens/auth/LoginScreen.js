@@ -21,7 +21,7 @@ const initialFocusState = {
   password: false,
 };
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
   const [state, setState] = useState(initialState);
   const [isShowPassword, setIsShowPassword] = useState(true);
   const [isShowKeybord, setIsShowKeybord] = useState(false);
@@ -61,7 +61,7 @@ export default function LoginScreen() {
       <View style={styles.container}>
         <ImageBackground
           style={styles.image}
-          source={require("../assets/images/photo-bg.jpg")}
+          source={require("../../assets/images/photo-bg.jpg")}
         >
           <View style={styles.box}>
             <View style={styles.avatarBox}>
@@ -126,7 +126,10 @@ export default function LoginScreen() {
               >
                 <Text style={styles.titleBtn}>Войти</Text>
               </TouchableOpacity>
-              <Text style={styles.textLink}>
+              <Text
+                style={styles.textLink}
+                onPress={() => navigation.navigate("Registration")}
+              >
                 Нет аккаунта? Зарегистрироваться
               </Text>
             </View>
