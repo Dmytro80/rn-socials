@@ -33,6 +33,7 @@ export default function LoginScreen({ navigation }) {
   );
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
     const onChange = () => {
@@ -49,10 +50,13 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handlerSubmit = () => {
-    console.log(inputs);
-    navigation.navigate("Home", { ...inputs, photo });
+    console.log({ ...inputs, photo, location });
+
     keyboardHide();
+
+    navigation.navigate("Posts", { ...inputs, photo, location });
     setInputs(initialInputs);
+    setPhoto(null);
   };
 
   const handlerFocus = (nameInput) => {
@@ -62,9 +66,12 @@ export default function LoginScreen({ navigation }) {
   const takePhoto = async () => {
     const photo = await camera.takePictureAsync();
 
-    // const location = await Location.getCurrentPositionAsync();
-    // console.log("latitude", location.coords.latitude);
-    // console.log("longitude", location.coords.longitude);
+    const location = await Location.getCurrentPositionAsync({});
+
+    setLocation(location);
+
+    console.log("latitude", location.coords.latitude);
+    console.log("longitude", location.coords.longitude);
     setPhoto(photo.uri);
     console.log("photo", photo.uri);
   };
