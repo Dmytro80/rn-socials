@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableWithoutFeedback } from "react-native";
+import { TouchableWithoutFeedback, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import PostsScreen from "./PostsScreen";
 import CreatePostsScreen from "./CreatePostsScreen";
@@ -8,9 +8,13 @@ import { Feather } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 
-export default function Home() {
+export default function Home({ navigation }) {
   return (
-    <Tab.Navigator tabBarOptions={{ showLabel: false }}>
+    <Tab.Navigator
+      tabBarOptions={{
+        showLabel: false,
+      }}
+    >
       <Tab.Screen
         name="Posts"
         component={PostsScreen}
@@ -20,12 +24,11 @@ export default function Home() {
             <Feather name="grid" size={size} color={color} />
           ),
           headerRight: () => (
-            <TouchableWithoutFeedback
-              style={{ paddingRight: 10 }}
-              // onPress={() => navigation.navigate("Login")}
-            >
-              <Feather name="log-out" size={24} color="#BDBDBD" />
-            </TouchableWithoutFeedback>
+            <View style={{ paddingRight: 16 }}>
+              <TouchableWithoutFeedback>
+                <Feather name="log-out" size={24} color="#BDBDBD" />
+              </TouchableWithoutFeedback>
+            </View>
           ),
         }}
       />
@@ -36,6 +39,13 @@ export default function Home() {
           title: "Создать публикацию",
           tabBarIcon: ({ focused, color, size }) => (
             <Feather name="plus" size={size} color={color} />
+          ),
+          headerLeft: () => (
+            <View style={{ paddingLeft: 16 }}>
+              <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
+                <Feather name="arrow-left" size={24} color="#BDBDBD" />
+              </TouchableWithoutFeedback>
+            </View>
           ),
         }}
       />
