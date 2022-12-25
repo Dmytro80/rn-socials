@@ -11,15 +11,17 @@ const Tab = createBottomTabNavigator();
 export default function Home({ navigation }) {
   return (
     <Tab.Navigator
-      tabBarOptions={{
-        showLabel: false,
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: "red",
+        tabBarInactiveTintColor: "#212121",
       }}
     >
       <Tab.Screen
         name="Posts"
         component={PostsScreen}
         options={{
-          title: "Публикации",
+          headerShown: false,
           tabBarIcon: ({ focused, color, size }) => (
             <Feather name="grid" size={size} color={color} />
           ),

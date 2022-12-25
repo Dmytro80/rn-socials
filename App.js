@@ -1,30 +1,43 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect, useCallback } from "react";
+import * as SplashScreen from "expo-splash-screen";
 import * as Font from "expo-font";
-import AppLoading from "expo-app-loading";
+
 import { useRouter } from "./router";
 import { NavigationContainer } from "@react-navigation/native";
 
-const loadApplication = async () => {
-  await Font.loadAsync({
-    "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
-    "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
-  });
-};
-
+SplashScreen.preventAutoHideAsync();
 export default function App() {
-  const [isReady, setIsReady] = useState(false);
+  const [appIsReady, setAppIsReady] = useState(false);
 
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await Font.loadAsync({
+          "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
+          "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
+        });
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
+  }
+
+  onLayoutRootView();
   const routing = useRouter(true);
 
-  if (!isReady) {
-    return (
-      <AppLoading
-        startAsync={loadApplication}
-        onFinish={() => setIsReady(true)}
-        onError={console.warn}
-      />
-    );
-  }
   return <NavigationContainer>{routing}</NavigationContainer>;
 }

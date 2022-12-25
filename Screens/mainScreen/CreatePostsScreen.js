@@ -54,7 +54,7 @@ export default function LoginScreen({ navigation }) {
 
     keyboardHide();
 
-    navigation.navigate("Posts", { ...inputs, photo, location });
+    navigation.navigate("DefaultScreen", { ...inputs, photo, location });
     setInputs(initialInputs);
     setPhoto(null);
   };
@@ -64,16 +64,13 @@ export default function LoginScreen({ navigation }) {
   };
 
   const takePhoto = async () => {
-    const photo = await camera.takePictureAsync();
+    const { uri } = await camera.takePictureAsync();
 
     const location = await Location.getCurrentPositionAsync({});
 
     setLocation(location);
 
-    console.log("latitude", location.coords.latitude);
-    console.log("longitude", location.coords.longitude);
-    setPhoto(photo.uri);
-    console.log("photo", photo.uri);
+    setPhoto(uri);
   };
 
   return (
