@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { Camera } from "expo-camera";
+import { Camera, CameraType } from "expo-camera";
 import * as Location from "expo-location";
 
 const initialInputs = {
@@ -34,6 +34,20 @@ export default function LoginScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [location, setLocation] = useState(null);
+  const [type, setType] = useState(CameraType.back);
+  const [cameraPermission, setCameraPermission] = useState(null);
+
+  const permission = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+
+    console.log(status);
+
+    setCameraPermission(status);
+
+    if (status !== "granted") {
+      alert("Permission for camera access needed.");
+    }
+  };
 
   useEffect(() => {
     const onChange = () => {
@@ -41,6 +55,8 @@ export default function LoginScreen({ navigation }) {
       setDimensions(width);
     };
     const subscription = Dimensions.addEventListener("change", onChange);
+
+    permission();
 
     return () => subscription?.remove();
   }, []);
@@ -73,6 +89,16 @@ export default function LoginScreen({ navigation }) {
     setPhoto(uri);
   };
 
+  function toggleCameraType() {
+    setType((current) =>
+      current === CameraType.back ? CameraType.front : CameraType.back
+    );
+  }
+
+  if (!cameraPermission) {
+    return;
+  }
+
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
@@ -84,11 +110,17 @@ export default function LoginScreen({ navigation }) {
         >
           <View style={{ marginTop: 32 }}>
             <View style={styles.cameraWrapper}>
+              <View style={styles.flip}>
+                <TouchableOpacity onPress={toggleCameraType}>
+                  <Text style={{ color: "red" }}>Flip Camera</Text>
+                </TouchableOpacity>
+              </View>
               <Camera
                 style={styles.camera}
                 ref={(ref) => {
                   setCamera(ref);
                 }}
+                type={type}
               >
                 {photo && (
                   <View style={styles.takePhotoContainer}>
@@ -191,7 +223,9 @@ const styles = StyleSheet.create({
     height: 240,
     position: "relative",
     marginBottom: 32,
+    borderRadius: 8,
   },
+  flip: { position: "absolute", top: 10, right: 10, zIndex: 3 },
   camera: {
     height: "100%",
     alignItems: "center",
