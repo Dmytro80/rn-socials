@@ -65,10 +65,18 @@ export default function LoginScreen({ navigation }) {
     Keyboard.dismiss();
   };
 
-  const handlerSubmit = () => {
-    console.log({ ...inputs, photo, location });
-
+  const handlerSubmit = async () => {
     keyboardHide();
+    const { granted } = await Location.requestForegroundPermissionsAsync();
+    console.log("status location", granted);
+
+    const currentLocation = await Location.getCurrentPositionAsync({});
+
+    if (granted) {
+      setLocation(currentLocation);
+    }
+
+    console.log({ ...inputs, photo, location });
 
     navigation.navigate("DefaultScreen", { ...inputs, photo, location });
     setInputs(initialInputs);
@@ -81,10 +89,6 @@ export default function LoginScreen({ navigation }) {
 
   const takePhoto = async () => {
     const { uri } = await camera.takePictureAsync();
-
-    const location = await Location.getCurrentPositionAsync({});
-
-    setLocation(location);
 
     setPhoto(uri);
   };
@@ -108,7 +112,7 @@ export default function LoginScreen({ navigation }) {
             width: dimensions,
           }}
         >
-          <View style={{ marginTop: 32 }}>
+          <View style={{ marginTop: 13 }}>
             <View style={styles.cameraWrapper}>
               <View style={styles.flip}>
                 <TouchableOpacity onPress={toggleCameraType}>
@@ -228,8 +232,7 @@ const styles = StyleSheet.create({
   flip: { position: "absolute", top: 10, right: 10, zIndex: 3 },
   camera: {
     height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
+    width: "100%",
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -256,10 +259,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   image: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
-    alignItems: "center",
+    // flex: 1,
+    // resizeMode: "cover",
+    // justifyContent: "center",
+    // alignItems: "center",
+    height: "100%",
+    width: "100%",
+    borderRadius: 8,
   },
   text: {
     fontFamily: "Roboto-Regular",
