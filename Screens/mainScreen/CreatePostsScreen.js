@@ -28,25 +28,32 @@ const initialFocusState = {
 export default function LoginScreen({ navigation }) {
   const [inputs, setInputs] = useState(initialInputs);
   const [focus, setFocus] = useState(initialFocusState);
+  const [isShowKeybord, setIsShowKeybord] = useState(false);
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2
   );
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
-  const [location, setLocation] = useState(null);
   const [type, setType] = useState(CameraType.back);
+
   const [cameraPermission, setCameraPermission] = useState(null);
+  const [locationPermission, setLocationPermission] = useState(null);
+
+  const [isShowPhoto, setIsShowPhoto] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const permission = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
-
-    console.log(status);
 
     setCameraPermission(status);
 
     if (status !== "granted") {
       alert("Permission for camera access needed.");
     }
+
+    const { granted } = await Location.requestForegroundPermissionsAsync();
+
+    setLocationPermission(granted);
   };
 
   useEffect(() => {
@@ -62,28 +69,29 @@ export default function LoginScreen({ navigation }) {
   }, []);
 
   const keyboardHide = () => {
+    setIsShowKeybord(false);
     Keyboard.dismiss();
   };
 
   const handlerSubmit = async () => {
     keyboardHide();
-    const { granted } = await Location.requestForegroundPermissionsAsync();
-    console.log("status location", granted);
-
+    setIsLoading(true);
     const currentLocation = await Location.getCurrentPositionAsync({});
 
-    if (granted) {
-      setLocation(currentLocation);
-    }
+    const data = {
+      ...inputs,
+      photo,
+      location: locationPermission ? currentLocation.coords : null,
+    };
 
-    console.log({ ...inputs, photo, location });
+    console.log("data", data);
 
-    navigation.navigate("DefaultScreen", { ...inputs, photo, location });
-    setInputs(initialInputs);
-    setPhoto(null);
+    navigation.navigate("DefaultScreen", data);
+    cleanNote();
   };
 
   const handlerFocus = (nameInput) => {
+    setIsShowKeybord(true);
     setFocus((prevState) => ({ ...prevState, [nameInput]: true }));
   };
 
@@ -93,11 +101,25 @@ export default function LoginScreen({ navigation }) {
     setPhoto(uri);
   };
 
-  function toggleCameraType() {
+  const toggleCameraType = () => {
     setType((current) =>
       current === CameraType.back ? CameraType.front : CameraType.back
     );
-  }
+  };
+
+  const toggleShowPhoto = () => {
+    if (!photo) {
+      return;
+    }
+    setIsShowPhoto(!isShowPhoto);
+  };
+
+  const cleanNote = () => {
+    setInputs(initialInputs);
+    setPhoto(null);
+    setIsShowPhoto(false);
+    setIsLoading(false);
+  };
 
   if (!cameraPermission) {
     return;
@@ -112,33 +134,65 @@ export default function LoginScreen({ navigation }) {
             width: dimensions,
           }}
         >
-          <View style={{ marginTop: 13 }}>
-            <View style={styles.cameraWrapper}>
-              <View style={styles.flip}>
-                <TouchableOpacity onPress={toggleCameraType}>
-                  <Text style={{ color: "red" }}>Flip Camera</Text>
-                </TouchableOpacity>
-              </View>
-              <Camera
-                style={styles.camera}
-                ref={(ref) => {
-                  setCamera(ref);
-                }}
-                type={type}
-              >
-                {photo && (
-                  <View style={styles.takePhotoContainer}>
-                    <Image source={{ uri: photo }} style={styles.image} />
+          <View style={{ marginTop: isShowKeybord ? 3 : 32 }}>
+            <View
+              style={{
+                ...styles.cameraWrapper,
+                marginBottom: isShowKeybord ? 0 : 32,
+              }}
+            >
+              {isShowPhoto ? (
+                <View>
+                  <Image source={{ uri: photo }} style={styles.image} />
+                </View>
+              ) : (
+                <View>
+                  <View style={styles.flip}>
+                    <TouchableOpacity onPress={toggleCameraType}>
+                      <Text style={{ color: "red" }}>Flip Camera</Text>
+                    </TouchableOpacity>
                   </View>
-                )}
-              </Camera>
+                  <Camera
+                    style={styles.camera}
+                    ref={(ref) => {
+                      setCamera(ref);
+                    }}
+                    type={type}
+                  >
+                    {photo && (
+                      <View style={styles.takePhotoContainer}>
+                        <Image
+                          source={{ uri: photo }}
+                          style={{ height: 100, width: 100, borderRadius: 10 }}
+                        />
+                      </View>
+                    )}
+                  </Camera>
+                </View>
+              )}
               <TouchableOpacity
+                disabled={isShowPhoto}
                 onPress={takePhoto}
-                style={styles.snapContainer}
+                style={{
+                  ...styles.snapContainer,
+                  backgroundColor: isShowPhoto
+                    ? "rgba(255, 255, 255, 0.3)"
+                    : "#fff",
+                }}
               >
-                <FontAwesome5 name="camera" size={24} color="#BDBDBD" />
+                <FontAwesome5
+                  name="camera"
+                  size={24}
+                  color={isShowPhoto ? "#fff" : "#BDBDBD"}
+                />
               </TouchableOpacity>
-              <Text style={styles.text}>Загрузите фото</Text>
+              <TouchableOpacity onPress={toggleShowPhoto}>
+                <Text style={styles.text}>
+                  {isShowPhoto && photo
+                    ? "Редактировать фото"
+                    : "Загрузите фото"}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <View style={{ marginBottom: 16 }}>
@@ -193,7 +247,7 @@ export default function LoginScreen({ navigation }) {
                 backgroundColor: photo ? "#FF6C00" : "#F6F6F6",
               }}
               activeOpacity={0.7}
-              disabled={!photo}
+              disabled={!photo || isLoading}
               onPress={handlerSubmit}
             >
               <Text
@@ -202,13 +256,24 @@ export default function LoginScreen({ navigation }) {
                   color: photo ? "#FFFFFF" : "#BDBDBD",
                 }}
               >
-                Опубликовать
+                {isLoading ? "Загружаем публикацию..." : "Опубликовать"}
               </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.trashBtnWrapper}>
-            <TouchableOpacity style={styles.trashBtn}>
-              <Feather name="trash-2" size={24} color="#BDBDBD" />
+            <TouchableOpacity
+              style={{
+                ...styles.trashBtn,
+                backgroundColor: photo ? "#FF6C00" : "#F6F6F6",
+              }}
+              disabled={!photo || isLoading}
+              onPress={cleanNote}
+            >
+              <Feather
+                name="trash-2"
+                size={24}
+                color={photo ? "#FFFFFF" : "#BDBDBD"}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -224,17 +289,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cameraWrapper: {
-    height: 240,
     position: "relative",
-    marginBottom: 32,
-    borderRadius: 8,
   },
   flip: { position: "absolute", top: 10, right: 10, zIndex: 3 },
   camera: {
-    height: "100%",
+    height: 240,
     width: "100%",
     borderRadius: 8,
     marginBottom: 8,
+    overflow: "hidden",
   },
   snapContainer: {
     position: "absolute",
@@ -245,27 +308,24 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: "50%",
-    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 5,
   },
   takePhotoContainer: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    height: 240,
-    zIndex: 3,
-    borderRadius: 8,
+    top: 10,
+    left: 10,
+    borderColor: "#fff",
+    borderWidth: 1,
+    borderRadius: 10,
   },
   image: {
-    // flex: 1,
-    // resizeMode: "cover",
-    // justifyContent: "center",
-    // alignItems: "center",
-    height: "100%",
+    height: 240,
     width: "100%",
     borderRadius: 8,
+    marginBottom: 8,
+    overflow: "hidden",
   },
   text: {
     fontFamily: "Roboto-Regular",
@@ -283,7 +343,6 @@ const styles = StyleSheet.create({
   input: {
     paddingBottom: 16,
     paddingTop: 16,
-
     height: 50,
     borderBottomWidth: 1,
     borderColor: "#E8E8E8",
@@ -309,7 +368,6 @@ const styles = StyleSheet.create({
   trashBtn: {
     width: 70,
     height: 40,
-    backgroundColor: "#F6F6F6",
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
