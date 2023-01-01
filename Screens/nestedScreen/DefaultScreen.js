@@ -63,7 +63,9 @@ export default function DefaultScreen({ route, navigation }) {
                   <Text style={styles.commentCount}>0</Text>
                 </View>
                 <View style={styles.locationContainer}>
-                  <TouchableOpacity onPress={() => navigation.navigate("Map")}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Map", item)}
+                  >
                     <Feather name="map-pin" size={24} color="#BDBDBD" />
                   </TouchableOpacity>
                   <Text style={styles.locationTitle}>{item.photoLocation}</Text>
