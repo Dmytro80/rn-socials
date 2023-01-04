@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
-import * as SplashScreen from "expo-splash-screen";
+import React, { useState, useEffect } from "react";
+
 import * as Font from "expo-font";
 
-import { useRouter } from "./router";
-import { NavigationContainer } from "@react-navigation/native";
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
 
-SplashScreen.preventAutoHideAsync();
+import Main from "./components/Main";
+
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -26,18 +27,13 @@ export default function App() {
     prepare();
   }, []);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
-      await SplashScreen.hideAsync();
-    }
-  }, [appIsReady]);
-
   if (!appIsReady) {
     return null;
   }
 
-  onLayoutRootView();
-  const routing = useRouter(true);
-
-  return <NavigationContainer>{routing}</NavigationContainer>;
+  return (
+    <Provider store={store}>
+      <Main />
+    </Provider>
+  );
 }

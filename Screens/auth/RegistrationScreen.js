@@ -11,6 +11,9 @@ import {
   Dimensions,
 } from "react-native";
 
+import { useDispatch } from "react-redux";
+import { authSignUpUser } from "../../redux/auth/authOperations";
+
 const initialState = {
   login: "",
   email: "",
@@ -25,12 +28,15 @@ const initialFocusState = {
 
 export default function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
-  const [isShowPassword, setIsShowPassword] = useState(true);
+  const [isHidePassword, setIsHidePassword] = useState(true);
   const [isShowKeybord, setIsShowKeybord] = useState(false);
   const [focus, setFocus] = useState(initialFocusState);
+
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2
   );
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const onChange = () => {
@@ -48,6 +54,7 @@ export default function RegistrationScreen({ navigation }) {
   };
 
   const handlerSubmit = () => {
+    dispatch(authSignUpUser(state));
     console.log(state);
     keyboardHide();
     setState(initialState);
@@ -56,6 +63,10 @@ export default function RegistrationScreen({ navigation }) {
   const handlerFocus = (nameInput) => {
     setIsShowKeybord(true);
     setFocus((prevState) => ({ ...prevState, [nameInput]: true }));
+  };
+
+  const toggleShowPassword = () => {
+    setIsHidePassword(!isHidePassword);
   };
 
   return (
@@ -121,7 +132,7 @@ export default function RegistrationScreen({ navigation }) {
                   marginBottom={0}
                   placeholder="Пароль"
                   placeholderTextColor="#BDBDBD"
-                  secureTextEntry={isShowPassword}
+                  secureTextEntry={isHidePassword}
                   onFocus={() => handlerFocus("password")}
                   onBlur={() =>
                     setFocus((prevState) => ({ ...prevState, password: false }))
@@ -130,11 +141,8 @@ export default function RegistrationScreen({ navigation }) {
                     setState((prevState) => ({ ...prevState, password: value }))
                   }
                 />
-                <Text
-                  style={styles.inputBtn}
-                  onPress={() => setIsShowPassword(false)}
-                >
-                  Показать
+                <Text style={styles.inputBtn} onPress={toggleShowPassword}>
+                  {isHidePassword ? "Показать" : "Скрыть"}
                 </Text>
               </View>
               <TouchableOpacity

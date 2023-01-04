@@ -11,6 +11,9 @@ import {
   Dimensions,
 } from "react-native";
 
+import { useDispatch } from "react-redux";
+import { authSignInUser } from "../../redux/auth/authOperations";
+
 const initialState = {
   email: "",
   password: "",
@@ -26,9 +29,12 @@ export default function LoginScreen({ navigation }) {
   const [isShowPassword, setIsShowPassword] = useState(true);
   const [isShowKeybord, setIsShowKeybord] = useState(false);
   const [focus, setFocus] = useState(initialFocusState);
+
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2
   );
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const onChange = () => {
@@ -46,7 +52,7 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handlerSubmit = () => {
-    console.log(state);
+    dispatch(authSignInUser(state));
     keyboardHide();
     setState(initialState);
   };
