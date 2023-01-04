@@ -25,13 +25,6 @@ export default function Home({ navigation }) {
           tabBarIcon: ({ focused, color, size }) => (
             <Feather name="grid" size={size} color={color} />
           ),
-          headerRight: () => (
-            <View style={{ paddingRight: 16 }}>
-              <TouchableWithoutFeedback>
-                <Feather name="log-out" size={24} color="#BDBDBD" />
-              </TouchableWithoutFeedback>
-            </View>
-          ),
         }}
       />
       <Tab.Screen

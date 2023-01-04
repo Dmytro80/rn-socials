@@ -5,8 +5,7 @@ export const authSignInUser =
   ({ email, password }) =>
   async (dispatch, getState) => {
     try {
-      const user = await db.auth().signInWithEmailAndPassword(email, password);
-      console.log("user", user);
+      await db.auth().signInWithEmailAndPassword(email, password);
     } catch (error) {
       console.log("error.message", error.message);
     }
@@ -37,6 +36,8 @@ export const authSignUpUser =
 
 export const authSignOutUser = () => async (dispatch, getState) => {
   try {
+    await db.auth().signOut();
+    dispatch(authSlice.actions.authSignOut());
   } catch (error) {
     console.log("error.message", error.message);
   }
