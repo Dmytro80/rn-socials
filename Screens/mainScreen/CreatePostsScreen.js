@@ -10,10 +10,13 @@ import {
   Dimensions,
   Image,
 } from "react-native";
+import { useSelector } from "react-redux";
 import { Feather } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Camera, CameraType } from "expo-camera";
 import * as Location from "expo-location";
+import { nanoid } from "@reduxjs/toolkit";
+import db from "../../firebase/config";
 
 const initialInputs = {
   photoName: "",
@@ -41,6 +44,8 @@ export default function LoginScreen({ navigation }) {
 
   const [isShowPhoto, setIsShowPhoto] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { userId, login } = useSelector((state) => state.auth);
 
   const permission = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
@@ -76,17 +81,10 @@ export default function LoginScreen({ navigation }) {
   const handlerSubmit = async () => {
     keyboardHide();
     setIsLoading(true);
-    const currentLocation = await Location.getCurrentPositionAsync({});
 
-    const data = {
-      ...inputs,
-      photo,
-      location: locationPermission ? currentLocation.coords : null,
-    };
+    await uploadPostToServer();
 
-    console.log("data", data);
-
-    navigation.navigate("DefaultScreen", data);
+    navigation.navigate("DefaultScreen");
     cleanNote();
   };
 
@@ -119,6 +117,42 @@ export default function LoginScreen({ navigation }) {
     setPhoto(null);
     setIsShowPhoto(false);
     setIsLoading(false);
+  };
+
+  const uploadPostToServer = async () => {
+    const photo = await uploadPhotoToServer();
+
+    const currentLocation = await Location.getCurrentPositionAsync({});
+
+    const createPost = await db
+      .firestore()
+      .collection("posts")
+      .add({
+        ...inputs,
+        photo,
+        location: locationPermission ? currentLocation.coords : null,
+        userId,
+        login,
+      });
+
+    console.log("createPost", createPost);
+  };
+
+  const uploadPhotoToServer = async () => {
+    const response = await fetch(photo);
+    const file = await response.blob();
+
+    const postId = nanoid();
+
+    await db.storage().ref(`postImage/${postId}`).put(file);
+
+    const processedPhoto = await db
+      .storage()
+      .ref("postImage")
+      .child(postId)
+      .getDownloadURL();
+
+    return processedPhoto;
   };
 
   if (!cameraPermission) {

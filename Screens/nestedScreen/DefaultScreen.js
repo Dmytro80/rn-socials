@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import db from "../../firebase/config";
+
 import {
   View,
   StyleSheet,
@@ -10,12 +12,21 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-export default function DefaultScreen({ route, navigation }) {
+export default function DefaultScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
-  console.log("route.params", route.params);
+
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2
   );
+
+  const getAllPosts = async () => {
+    await db
+      .firestore()
+      .collection("posts")
+      .onSnapshot((data) =>
+        setPosts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+      );
+  };
 
   useEffect(() => {
     const onChange = () => {
@@ -24,14 +35,10 @@ export default function DefaultScreen({ route, navigation }) {
     };
     const subscription = Dimensions.addEventListener("change", onChange);
 
+    getAllPosts();
+
     return () => subscription?.remove();
   }, []);
-
-  useEffect(() => {
-    if (route.params) {
-      setPosts((prevState) => [...prevState, route.params]);
-    }
-  }, [route.params]);
 
   console.log("posts", posts);
 
