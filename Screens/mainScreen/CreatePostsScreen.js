@@ -120,39 +120,45 @@ export default function LoginScreen({ navigation }) {
   };
 
   const uploadPostToServer = async () => {
-    const photo = await uploadPhotoToServer();
+    try {
+      const photo = await uploadPhotoToServer();
 
-    const currentLocation = await Location.getCurrentPositionAsync({});
+      const currentLocation = await Location.getCurrentPositionAsync({});
 
-    const createPost = await db
-      .firestore()
-      .collection("posts")
-      .add({
-        ...inputs,
-        photo,
-        location: locationPermission ? currentLocation.coords : null,
-        userId,
-        login,
-      });
-
-    console.log("createPost", createPost);
+      await db
+        .firestore()
+        .collection("posts")
+        .add({
+          ...inputs,
+          photo,
+          location: locationPermission ? currentLocation.coords : null,
+          userId,
+          login,
+        });
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
   };
 
   const uploadPhotoToServer = async () => {
-    const response = await fetch(photo);
-    const file = await response.blob();
+    try {
+      const response = await fetch(photo);
+      const file = await response.blob();
 
-    const postId = nanoid();
+      const postId = nanoid();
 
-    await db.storage().ref(`postImage/${postId}`).put(file);
+      await db.storage().ref(`postImage/${postId}`).put(file);
 
-    const processedPhoto = await db
-      .storage()
-      .ref("postImage")
-      .child(postId)
-      .getDownloadURL();
+      const processedPhoto = await db
+        .storage()
+        .ref("postImage")
+        .child(postId)
+        .getDownloadURL();
 
-    return processedPhoto;
+      return processedPhoto;
+    } catch (error) {
+      console.error("Error adding photo: ", error);
+    }
   };
 
   if (!cameraPermission) {

@@ -10,7 +10,7 @@ import { authSignOutUser } from "../../redux/auth/authOperations";
 
 const NestedScreen = createStackNavigator();
 
-export default function PostsScreen() {
+export default function PostsScreen({ navigation }) {
   const dispatch = useDispatch();
 
   return (
@@ -31,8 +31,40 @@ export default function PostsScreen() {
           ),
         }}
       />
-      <NestedScreen.Screen name="Comments" component={CommentsScreen} />
-      <NestedScreen.Screen name="Map" component={MapScreen} />
+      <NestedScreen.Screen
+        name="Comments"
+        component={CommentsScreen}
+        options={{
+          title: "Комментарии",
+          tabBarIcon: ({ focused, color, size }) => (
+            <Feather name="plus" size={size} color={color} />
+          ),
+          headerLeft: () => (
+            <View style={{ paddingLeft: 16 }}>
+              <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
+                <Feather name="arrow-left" size={24} color="#BDBDBD" />
+              </TouchableWithoutFeedback>
+            </View>
+          ),
+        }}
+      />
+      <NestedScreen.Screen
+        name="Map"
+        component={MapScreen}
+        options={{
+          title: "Карта",
+          tabBarIcon: ({ focused, color, size }) => (
+            <Feather name="plus" size={size} color={color} />
+          ),
+          headerLeft: () => (
+            <View style={{ paddingLeft: 16 }}>
+              <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
+                <Feather name="arrow-left" size={24} color="#BDBDBD" />
+              </TouchableWithoutFeedback>
+            </View>
+          ),
+        }}
+      />
     </NestedScreen.Navigator>
   );
 }

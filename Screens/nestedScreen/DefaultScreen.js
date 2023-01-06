@@ -20,12 +20,16 @@ export default function DefaultScreen({ navigation }) {
   );
 
   const getAllPosts = async () => {
-    await db
-      .firestore()
-      .collection("posts")
-      .onSnapshot((data) =>
-        setPosts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
-      );
+    try {
+      await db
+        .firestore()
+        .collection("posts")
+        .onSnapshot((data) =>
+          setPosts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+        );
+    } catch (error) {
+      console.error("Error getting documents: ", error);
+    }
   };
 
   useEffect(() => {
@@ -40,14 +44,12 @@ export default function DefaultScreen({ navigation }) {
     return () => subscription?.remove();
   }, []);
 
-  console.log("posts", posts);
-
   return (
     <View style={styles.container}>
       <View style={{ width: dimensions }}>
         <FlatList
           data={posts}
-          keyExtractor={(item, indx) => indx.toString()}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View
               style={{
@@ -63,7 +65,12 @@ export default function DefaultScreen({ navigation }) {
               <View style={styles.actionsWrapper}>
                 <View style={styles.commentsContainer}>
                   <TouchableOpacity
-                    onPress={() => navigation.navigate("Comments")}
+                    onPress={() =>
+                      navigation.navigate("Comments", {
+                        postId: item.id,
+                        photo: item.photo,
+                      })
+                    }
                   >
                     <Feather name="message-circle" size={24} color="#BDBDBD" />
                   </TouchableOpacity>
