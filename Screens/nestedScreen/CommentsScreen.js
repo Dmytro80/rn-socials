@@ -46,14 +46,18 @@ export default function CommentsScreen({ route }) {
   const createComment = async () => {
     try {
       const date = getCurrentDate();
-      console.log("date", date);
+
       await db
         .firestore()
         .collection("posts")
         .doc(postId)
         .collection("comments")
         .add({ comment, login, date });
+
+      incrementCountComments();
+
       keyboardHide();
+
       setComment("");
     } catch (error) {
       console.log("Error creating comment", error.message);
@@ -76,6 +80,14 @@ export default function CommentsScreen({ route }) {
     } catch (error) {
       console.log("Error geting comments", error.message);
     }
+  };
+
+  const incrementCountComments = () => {
+    const currentCommentRef = db.firestore().collection("posts").doc(postId);
+
+    currentCommentRef.update({
+      countComments: db.firestore.FieldValue.increment(1),
+    });
   };
 
   const keyboardHide = () => {

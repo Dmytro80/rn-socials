@@ -134,6 +134,8 @@ export default function LoginScreen({ navigation }) {
           location: locationPermission ? currentLocation.coords : null,
           userId,
           login,
+          countComments: 0,
+          countLike: 0,
         });
     } catch (error) {
       console.error("Error adding document: ", error);

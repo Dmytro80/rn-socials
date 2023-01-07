@@ -73,9 +73,19 @@ export default function DefaultScreen({ navigation }) {
                       })
                     }
                   >
-                    <Feather name="message-circle" size={24} color="#BDBDBD" />
+                    {item.countComments === 0 ? (
+                      <Image
+                        source={require("../../assets/images/message-circle.png")}
+                        style={{ tintColor: "#BDBDBD" }}
+                      />
+                    ) : (
+                      <Image
+                        source={require("../../assets/images/message-circle-fill.png")}
+                      />
+                    )}
                   </TouchableOpacity>
-                  <Text style={styles.commentCount}>0</Text>
+                  <Text style={styles.commentCount}>{item.countComments}</Text>
+                  <Text>{item.countLike}</Text>
                 </View>
                 <View style={styles.locationContainer}>
                   <TouchableOpacity
