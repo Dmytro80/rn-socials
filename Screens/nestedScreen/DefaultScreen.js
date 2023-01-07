@@ -14,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 
 export default function DefaultScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
+  console.log("posts on start", posts);
 
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2

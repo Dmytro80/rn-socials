@@ -15,6 +15,7 @@ import {
 
 import { useSelector } from "react-redux";
 import db from "../../firebase/config";
+import getCurrentDate from "../../utils/getCurrentDate";
 
 export default function CommentsScreen({ route }) {
   const { postId, photo } = route.params;
@@ -38,20 +39,20 @@ export default function CommentsScreen({ route }) {
     const subscription = Dimensions.addEventListener("change", onChange);
 
     getAllComments();
-    const time = getCurrentDate();
-    console.log("time", time);
 
     return () => subscription?.remove();
   }, []);
 
   const createComment = async () => {
     try {
+      const date = getCurrentDate();
+      console.log("date", date);
       await db
         .firestore()
         .collection("posts")
         .doc(postId)
         .collection("comments")
-        .add({ comment, login });
+        .add({ comment, login, date });
       keyboardHide();
       setComment("");
     } catch (error) {
@@ -66,6 +67,7 @@ export default function CommentsScreen({ route }) {
         .collection("posts")
         .doc(postId)
         .collection("comments")
+        .orderBy("date", "asc")
         .onSnapshot((data) =>
           setAllComments(
             data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
@@ -86,37 +88,9 @@ export default function CommentsScreen({ route }) {
     setFocus(true);
   };
 
-  function getCurrentDate(separator = " ") {
-    const months = [
-      "января",
-      "февраля",
-      "марта",
-      "апреля",
-      "мая",
-      "июня",
-      "июля",
-      "августа",
-      "сентября",
-      "октября",
-      "ноября",
-      "декабря",
-    ];
-    let newDate = new Date();
-    let date = newDate.getDate();
-    let month = newDate.getMonth();
-    let year = newDate.getFullYear();
-    let hour = newDate.getHours();
-    let minutes = newDate.getMinutes();
-
-    return `${date < 10 ? `0${date}` : `${date}`}${separator}${
-      months[month]
-    }${","}${separator}${year}${separator}${"|"}${separator}${
-      hour < 10 ? `0${hour}` : `${hour}`
-    }${":"}${minutes < 10 ? `0${minutes}` : `${minutes}`}`;
-  }
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <View
           style={{
             width: dimensions,
@@ -128,18 +102,58 @@ export default function CommentsScreen({ route }) {
           <View>
             <Image source={{ uri: photo }} style={styles.image} />
           </View>
-          <SafeAreaView style={{ flex: 1 }}>
+          <View
+            style={{
+              flex: 1,
+              marginBottom: 32,
+              marginTop: 32,
+              justifyContent: "center",
+            }}
+          >
             <FlatList
               data={allComments}
               renderItem={({ item }) => (
-                <View>
-                  <Text>{item.comment}</Text>
-                  <Text>{item.login}</Text>
+                <View
+                  style={{
+                    marginBottom: 24,
+                    flexDirection: login === item.login ? "row-reverse" : "row",
+                  }}
+                >
+                  <View
+                    style={{
+                      ...styles.avatarWrapper,
+                      marginLeft: login === item.login ? 16 : 0,
+                      marginRight: login !== item.login ? 16 : 0,
+                    }}
+                  >
+                    <Text>{item.login}</Text>
+                  </View>
+                  <View
+                    style={{
+                      ...styles.commentWrapper,
+                      borderTopLeftRadius: login === item.login ? 6 : 0,
+                      borderTopRightRadius: login === item.login ? 0 : 6,
+                    }}
+                  >
+                    <View style={{ marginBottom: 8 }}>
+                      <Text style={styles.comment}>{item.comment}</Text>
+                    </View>
+                    <View>
+                      <Text
+                        style={{
+                          ...styles.date,
+                          textAlign: login === item.login ? "left" : "right",
+                        }}
+                      >
+                        {item.date}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               )}
               keyExtractor={(item) => item.id}
             />
-          </SafeAreaView>
+          </View>
           <View
             style={{
               marginBottom: 16,
@@ -166,7 +180,7 @@ export default function CommentsScreen({ route }) {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 }
@@ -203,5 +217,34 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: "50%",
     backgroundColor: "#FF6C00",
+  },
+  avatarWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 28,
+    height: 28,
+    borderRadius: "50%",
+    overflow: "hidden",
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
+  },
+  commentWrapper: {
+    flex: 1,
+
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
+    padding: 16,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+  },
+  comment: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 13,
+    lineHeight: 18,
+    color: "#212121",
+  },
+  date: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 10,
+    lineHeight: 12,
+    color: "#BDBDBD",
   },
 });
