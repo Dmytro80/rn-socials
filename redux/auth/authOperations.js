@@ -12,21 +12,33 @@ export const authSignInUser =
   };
 
 export const authSignUpUser =
-  ({ login, email, password }) =>
+  ({ login, email, password, pickedImagePath }) =>
   async (dispatch, getState) => {
     try {
       await db.auth().createUserWithEmailAndPassword(email, password);
 
       const user = await db.auth().currentUser;
 
-      await user.updateProfile({ displayName: login });
+      const response = await fetch(pickedImagePath);
+      const file = await response.blob();
 
-      const { uid, displayName } = await db.auth().currentUser;
+      await db.storage().ref(`avatarImage/${user.uid}`).put(file);
+
+      const userAvatar = await db
+        .storage()
+        .ref("avatarImage")
+        .child(user.uid)
+        .getDownloadURL();
+
+      await user.updateProfile({ displayName: login, photoURL: userAvatar });
+
+      const { uid, displayName, photoURL } = await db.auth().currentUser;
 
       dispatch(
         authSlice.actions.updateUserProfile({
           userId: uid,
           login: displayName,
+          userAvatar: photoURL,
         })
       );
     } catch (error) {
@@ -51,6 +63,7 @@ export const authStateChangeUser = () => async (dispatch, getState) => {
           authSlice.actions.updateUserProfile({
             userId: user.uid,
             login: user.displayName,
+            userAvatar: user.photoURL,
           })
         );
         dispatch(authSlice.actions.authStateChange({ stateChange: true }));

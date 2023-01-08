@@ -3,6 +3,7 @@ import {
   View,
   StyleSheet,
   ImageBackground,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
@@ -10,6 +11,8 @@ import {
   Keyboard,
   Dimensions,
 } from "react-native";
+
+import * as ImagePicker from "expo-image-picker";
 
 import { useDispatch } from "react-redux";
 import { authSignUpUser } from "../../redux/auth/authOperations";
@@ -31,6 +34,7 @@ export default function RegistrationScreen({ navigation }) {
   const [isHidePassword, setIsHidePassword] = useState(true);
   const [isShowKeybord, setIsShowKeybord] = useState(false);
   const [focus, setFocus] = useState(initialFocusState);
+  const [pickedImagePath, setPickedImagePath] = useState("");
 
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2
@@ -53,20 +57,41 @@ export default function RegistrationScreen({ navigation }) {
     Keyboard.dismiss();
   };
 
-  const handlerSubmit = () => {
-    dispatch(authSignUpUser(state));
+  const handleSubmit = async () => {
+    dispatch(authSignUpUser({ ...state, pickedImagePath }));
     console.log(state);
     keyboardHide();
     setState(initialState);
   };
 
-  const handlerFocus = (nameInput) => {
+  const handleFocus = (nameInput) => {
     setIsShowKeybord(true);
     setFocus((prevState) => ({ ...prevState, [nameInput]: true }));
   };
 
   const toggleShowPassword = () => {
     setIsHidePassword(!isHidePassword);
+  };
+
+  const showImagePicker = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("You've refused to allow this appp to access your photos!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setPickedImagePath(result.assets[0].uri);
+    }
   };
 
   return (
@@ -78,8 +103,28 @@ export default function RegistrationScreen({ navigation }) {
         >
           <View style={styles.box}>
             <View style={styles.avatarBox}>
-              <TouchableOpacity style={styles.avatarBtn} activeOpacity={0.7}>
-                <Text style={styles.avatarBtnText}>+</Text>
+              {pickedImagePath !== "" && (
+                <Image
+                  source={{ uri: pickedImagePath }}
+                  style={styles.avatarImage}
+                />
+              )}
+              <TouchableOpacity
+                onPress={() => showImagePicker()}
+                style={{
+                  ...styles.avatarBtn,
+                  borderColor: pickedImagePath !== "" ? "#BDBDBD" : "#FF6C00",
+                }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={{
+                    color: pickedImagePath !== "" ? "#BDBDBD" : "#FF6C00",
+                    fontSize: 13,
+                  }}
+                >
+                  {pickedImagePath !== "" ? "X" : "+"}
+                </Text>
               </TouchableOpacity>
             </View>
             <Text style={styles.title}>Регистрация</Text>
@@ -98,7 +143,7 @@ export default function RegistrationScreen({ navigation }) {
                 value={state.login}
                 placeholder="Логин"
                 placeholderTextColor="#BDBDBD"
-                onFocus={() => handlerFocus("login")}
+                onFocus={() => handleFocus("login")}
                 onBlur={() =>
                   setFocus((prevState) => ({ ...prevState, login: false }))
                 }
@@ -114,7 +159,7 @@ export default function RegistrationScreen({ navigation }) {
                 value={state.email}
                 placeholder="Адрес электронной почты"
                 placeholderTextColor="#BDBDBD"
-                onFocus={() => handlerFocus("email")}
+                onFocus={() => handleFocus("email")}
                 onBlur={() =>
                   setFocus((prevState) => ({ ...prevState, email: false }))
                 }
@@ -133,7 +178,7 @@ export default function RegistrationScreen({ navigation }) {
                   placeholder="Пароль"
                   placeholderTextColor="#BDBDBD"
                   secureTextEntry={isHidePassword}
-                  onFocus={() => handlerFocus("password")}
+                  onFocus={() => handleFocus("password")}
                   onBlur={() =>
                     setFocus((prevState) => ({ ...prevState, password: false }))
                   }
@@ -148,7 +193,7 @@ export default function RegistrationScreen({ navigation }) {
               <TouchableOpacity
                 style={styles.submitBtn}
                 activeOpacity={0.7}
-                onPress={handlerSubmit}
+                onPress={handleSubmit}
               >
                 <Text style={styles.titleBtn}>Зарегистрироваться</Text>
               </TouchableOpacity>
@@ -189,7 +234,14 @@ const styles = StyleSheet.create({
     top: -60,
     width: 120,
     height: 120,
+
     backgroundColor: "#F6F6F6",
+    borderRadius: 16,
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    resizeMode: "cover",
     borderRadius: 16,
   },
   avatarBtn: {
@@ -204,12 +256,8 @@ const styles = StyleSheet.create({
     borderRadius: "50%",
     borderWidth: 1,
     borderColor: "#FF6C00",
-    color: "FF6C00",
   },
-  avatarBtnText: {
-    color: "#FF6C00",
-    fontSize: 18,
-  },
+
   form: {
     marginTop: 32,
   },

@@ -24,7 +24,7 @@ export default function CommentsScreen({ route }) {
   const [focus, setFocus] = useState(false);
   const [isShowKeybord, setIsShowKeybord] = useState(false);
 
-  const { login } = useSelector((state) => state.auth);
+  const { login, userAvatar } = useSelector((state) => state.auth);
 
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2
@@ -51,7 +51,7 @@ export default function CommentsScreen({ route }) {
         .collection("posts")
         .doc(postId)
         .collection("comments")
-        .add({ comment, login, date });
+        .add({ comment, login, date, userAvatar });
 
       incrementCountComments();
 
@@ -129,7 +129,10 @@ export default function CommentsScreen({ route }) {
                     marginRight: login !== item.login ? 16 : 0,
                   }}
                 >
-                  <Text>{item.login}</Text>
+                  <Image
+                    source={{ uri: item.userAvatar }}
+                    style={styles.avatarImage}
+                  />
                 </View>
                 <View
                   style={{
@@ -224,6 +227,12 @@ const styles = StyleSheet.create({
     borderRadius: "50%",
     overflow: "hidden",
     backgroundColor: "rgba(0, 0, 0, 0.03)",
+  },
+  avatarImage: {
+    width: 28,
+    height: 28,
+    resizeMode: "cover",
+    // borderRadius: 16,
   },
   commentsBox: {
     flex: 1,
