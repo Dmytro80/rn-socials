@@ -10,11 +10,12 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
+
 import { Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function DefaultScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
-  console.log("posts on start", posts);
 
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2
@@ -45,6 +46,14 @@ export default function DefaultScreen({ navigation }) {
     return () => subscription?.remove();
   }, []);
 
+  const incrementCountLikes = (postId) => {
+    const currentPostRef = db.firestore().collection("posts").doc(postId);
+
+    currentPostRef.update({
+      countLike: db.firestore.FieldValue.increment(1),
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={{ width: dimensions }}>
@@ -64,28 +73,55 @@ export default function DefaultScreen({ navigation }) {
                 <Text style={styles.photoName}>{item.photoName}</Text>
               </View>
               <View style={styles.actionsWrapper}>
-                <View style={styles.commentsContainer}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      navigation.navigate("Comments", {
-                        postId: item.id,
-                        photo: item.photo,
-                      })
-                    }
-                  >
-                    {item.countComments === 0 ? (
-                      <Image
-                        source={require("../../assets/images/message-circle.png")}
-                        style={{ tintColor: "#BDBDBD" }}
+                <View style={{ flexDirection: "row" }}>
+                  <View style={styles.commentsContainer}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("Comments", {
+                          postId: item.id,
+                          photo: item.photo,
+                        })
+                      }
+                    >
+                      {item.countComments === 0 ? (
+                        <Image
+                          source={require("../../assets/images/message-circle.png")}
+                          style={{ tintColor: "#BDBDBD" }}
+                        />
+                      ) : (
+                        <Image
+                          source={require("../../assets/images/message-circle-fill.png")}
+                        />
+                      )}
+                    </TouchableOpacity>
+                    <Text
+                      style={{
+                        ...styles.commentCount,
+                        color: item.countComments === 0 ? "#BDBDBD" : "#212121",
+                      }}
+                    >
+                      {item.countComments}
+                    </Text>
+                  </View>
+                  <View style={styles.likesContainer}>
+                    <TouchableOpacity
+                      onPress={() => incrementCountLikes(item.id)}
+                    >
+                      <AntDesign
+                        name="like2"
+                        size={24}
+                        color={item.countLike === 0 ? "#BDBDBD" : "#FF6C00"}
                       />
-                    ) : (
-                      <Image
-                        source={require("../../assets/images/message-circle-fill.png")}
-                      />
-                    )}
-                  </TouchableOpacity>
-                  <Text style={styles.commentCount}>{item.countComments}</Text>
-                  <Text>{item.countLike}</Text>
+                    </TouchableOpacity>
+                    <Text
+                      style={{
+                        ...styles.likesCount,
+                        color: item.countLike === 0 ? "#BDBDBD" : "#212121",
+                      }}
+                    >
+                      {item.countLike}
+                    </Text>
+                  </View>
                 </View>
                 <View style={styles.locationContainer}>
                   <TouchableOpacity
@@ -133,14 +169,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-
+  likesContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 24,
+  },
   commentCount: {
     marginLeft: 6,
     ontFamily: "Roboto-Regular",
     fontWeight: "400",
     fontSize: 16,
     lineHeight: 19,
-    color: "#BDBDBD",
+  },
+  likesCount: {
+    marginLeft: 6,
+    ontFamily: "Roboto-Regular",
+    fontWeight: "400",
+    fontSize: 16,
+    lineHeight: 19,
   },
   locationContainer: {
     flexDirection: "row",

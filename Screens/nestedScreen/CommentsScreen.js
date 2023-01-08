@@ -9,7 +9,6 @@ import {
   FlatList,
   TextInput,
   Keyboard,
-  TouchableWithoutFeedback,
   TouchableOpacity,
 } from "react-native";
 
@@ -101,99 +100,85 @@ export default function CommentsScreen({ route }) {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={keyboardHide}>
-      <SafeAreaView style={styles.container}>
-        <View
-          style={{
-            width: dimensions,
-            flex: 1,
-            marginBottom: isShowKeybord ? 232 : 0,
-            marginTop: isShowKeybord ? 0 : 32,
-          }}
-        >
-          <View>
-            <Image source={{ uri: photo }} style={styles.image} />
-          </View>
-          <View
-            style={{
-              flex: 1,
-              marginBottom: 32,
-              marginTop: 32,
-              justifyContent: "center",
-            }}
-          >
-            <FlatList
-              data={allComments}
-              renderItem={({ item }) => (
+    <SafeAreaView style={styles.container}>
+      <View
+        style={{
+          width: dimensions,
+          flex: 1,
+          marginBottom: isShowKeybord ? 232 : 0,
+          marginTop: isShowKeybord ? 0 : 32,
+        }}
+      >
+        <View>
+          <Image source={{ uri: photo }} style={styles.image} />
+        </View>
+        <View style={styles.commentsBox}>
+          <FlatList
+            data={allComments}
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  marginBottom: 24,
+                  flexDirection: login === item.login ? "row-reverse" : "row",
+                }}
+              >
                 <View
                   style={{
-                    marginBottom: 24,
-                    flexDirection: login === item.login ? "row-reverse" : "row",
+                    ...styles.avatarWrapper,
+                    marginLeft: login === item.login ? 16 : 0,
+                    marginRight: login !== item.login ? 16 : 0,
                   }}
                 >
-                  <View
-                    style={{
-                      ...styles.avatarWrapper,
-                      marginLeft: login === item.login ? 16 : 0,
-                      marginRight: login !== item.login ? 16 : 0,
-                    }}
-                  >
-                    <Text>{item.login}</Text>
+                  <Text>{item.login}</Text>
+                </View>
+                <View
+                  style={{
+                    ...styles.commentWrapper,
+                    borderTopLeftRadius: login === item.login ? 6 : 0,
+                    borderTopRightRadius: login === item.login ? 0 : 6,
+                  }}
+                >
+                  <View style={{ marginBottom: 8 }}>
+                    <Text style={styles.comment}>{item.comment}</Text>
                   </View>
-                  <View
-                    style={{
-                      ...styles.commentWrapper,
-                      borderTopLeftRadius: login === item.login ? 6 : 0,
-                      borderTopRightRadius: login === item.login ? 0 : 6,
-                    }}
-                  >
-                    <View style={{ marginBottom: 8 }}>
-                      <Text style={styles.comment}>{item.comment}</Text>
-                    </View>
-                    <View>
-                      <Text
-                        style={{
-                          ...styles.date,
-                          textAlign: login === item.login ? "left" : "right",
-                        }}
-                      >
-                        {item.date}
-                      </Text>
-                    </View>
+                  <View>
+                    <Text
+                      style={{
+                        ...styles.date,
+                        textAlign: login === item.login ? "left" : "right",
+                      }}
+                    >
+                      {item.date}
+                    </Text>
                   </View>
                 </View>
-              )}
-              keyExtractor={(item) => item.id}
-            />
-          </View>
-          <View
-            style={{
-              marginBottom: 16,
-              position: "relative",
-            }}
-          >
-            <TextInput
-              style={{
-                ...styles.input,
-                borderColor: focus ? "#FF6C00" : "#E8E8E8",
-              }}
-              value={comment}
-              placeholder="Комментировать..."
-              placeholderTextColor="#BDBDBD"
-              onFocus={() => handleFocus()}
-              onBlur={() => setFocus(false)}
-              onChangeText={(value) => setComment(value)}
-            />
-            <TouchableOpacity style={styles.submitBtn} onPress={createComment}>
-              <Image
-                source={require("../../assets/images/arrow-up.png")}
-                style={{ tintColor: "#fff" }}
-              />
-            </TouchableOpacity>
-          </View>
+              </View>
+            )}
+            keyExtractor={(item) => item.id}
+          />
         </View>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={{
+              ...styles.input,
+              borderColor: focus ? "#FF6C00" : "#E8E8E8",
+            }}
+            value={comment}
+            placeholder="Комментировать..."
+            placeholderTextColor="#BDBDBD"
+            onFocus={() => handleFocus()}
+            onBlur={() => setFocus(false)}
+            onChangeText={(value) => setComment(value)}
+          />
+          <TouchableOpacity style={styles.submitBtn} onPress={createComment}>
+            <Image
+              source={require("../../assets/images/arrow-up.png")}
+              style={{ tintColor: "#fff" }}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -207,6 +192,7 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 8,
   },
+  inputWrapper: { marginBottom: 16, position: "relative" },
   input: {
     padding: 16,
     paddingRight: 46,
@@ -238,6 +224,12 @@ const styles = StyleSheet.create({
     borderRadius: "50%",
     overflow: "hidden",
     backgroundColor: "rgba(0, 0, 0, 0.03)",
+  },
+  commentsBox: {
+    flex: 1,
+    marginBottom: 32,
+    marginTop: 32,
+    justifyContent: "center",
   },
   commentWrapper: {
     flex: 1,
