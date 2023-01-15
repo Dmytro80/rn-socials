@@ -31,10 +31,14 @@ const initialFocusState = {
 
 export default function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
+
   const [isHidePassword, setIsHidePassword] = useState(true);
+
   const [isShowKeybord, setIsShowKeybord] = useState(false);
+
   const [focus, setFocus] = useState(initialFocusState);
-  const [pickedImagePath, setPickedImagePath] = useState("");
+
+  const [pickedImagePath, setPickedImagePath] = useState(null);
 
   const [dimensions, setDimensions] = useState(
     Dimensions.get("window").width - 16 * 2
@@ -103,7 +107,7 @@ export default function RegistrationScreen({ navigation }) {
         >
           <View style={styles.box}>
             <View style={styles.avatarBox}>
-              {pickedImagePath !== "" && (
+              {pickedImagePath && (
                 <Image
                   source={{ uri: pickedImagePath }}
                   style={styles.avatarImage}
@@ -113,17 +117,17 @@ export default function RegistrationScreen({ navigation }) {
                 onPress={() => showImagePicker()}
                 style={{
                   ...styles.avatarBtn,
-                  borderColor: pickedImagePath !== "" ? "#BDBDBD" : "#FF6C00",
+                  borderColor: pickedImagePath ? "#BDBDBD" : "#FF6C00",
                 }}
                 activeOpacity={0.7}
               >
                 <Text
                   style={{
-                    color: pickedImagePath !== "" ? "#BDBDBD" : "#FF6C00",
+                    color: pickedImagePath ? "#BDBDBD" : "#FF6C00",
                     fontSize: 13,
                   }}
                 >
-                  {pickedImagePath !== "" ? "X" : "+"}
+                  {pickedImagePath ? "X" : "+"}
                 </Text>
               </TouchableOpacity>
             </View>

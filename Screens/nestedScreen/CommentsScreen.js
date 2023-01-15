@@ -81,12 +81,19 @@ export default function CommentsScreen({ route }) {
     }
   };
 
-  const incrementCountComments = () => {
-    const currentCommentRef = db.firestore().collection("posts").doc(postId);
+  const incrementCountComments = async () => {
+    try {
+      const currentCommentRef = await db
+        .firestore()
+        .collection("posts")
+        .doc(postId);
 
-    currentCommentRef.update({
-      countComments: db.firestore.FieldValue.increment(1),
-    });
+      currentCommentRef.update({
+        countComments: db.firestore.FieldValue.increment(1),
+      });
+    } catch (error) {
+      console.log("error increment count of comments", error.message);
+    }
   };
 
   const keyboardHide = () => {

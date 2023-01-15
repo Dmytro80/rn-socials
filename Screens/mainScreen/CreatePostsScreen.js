@@ -145,7 +145,10 @@ export default function LoginScreen({ navigation }) {
   const uploadPhotoToServer = async () => {
     try {
       const response = await fetch(photo);
+
       const file = await response.blob();
+
+      console.log("file in createPost", file);
 
       const postId = nanoid();
 
