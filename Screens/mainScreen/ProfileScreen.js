@@ -10,11 +10,17 @@ import {
   TouchableOpacity,
   Text,
   Image,
+  TouchableWithoutFeedback,
 } from "react-native";
 
 import { useSelector, useDispatch } from "react-redux";
 
-import { authUpdateAvatar } from "../../redux/auth/authOperations";
+import {
+  authUpdateAvatar,
+  authSignOutUser,
+} from "../../redux/auth/authOperations";
+
+import { Feather } from "@expo/vector-icons";
 
 export default function ProfileScreen() {
   const [dimensions, setDimensions] = useState(
@@ -96,6 +102,13 @@ export default function ProfileScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.logoutBtn}>
+            <TouchableWithoutFeedback
+              onPress={() => dispatch(authSignOutUser())}
+            >
+              <Feather name="log-out" size={24} color="#BDBDBD" />
+            </TouchableWithoutFeedback>
+          </View>
         </View>
       </ImageBackground>
     </View>
@@ -147,5 +160,11 @@ const styles = StyleSheet.create({
     borderRadius: "50%",
     borderWidth: 1,
     borderColor: "#FF6C00",
+  },
+  logoutBtn: {
+    paddingRight: 16,
+    position: "absolute",
+    top: 22,
+    right: 0,
   },
 });
