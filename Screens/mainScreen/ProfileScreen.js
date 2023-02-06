@@ -1,40 +1,103 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-// import db from "../../firebase/config";
+import React, { useState, useEffect } from "react";
+
+import * as ImagePicker from "expo-image-picker";
+
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  ImageBackground,
+  TouchableOpacity,
+  Text,
+  Image,
+} from "react-native";
+
+import { useSelector, useDispatch } from "react-redux";
+
+import { authUpdateAvatar } from "../../redux/auth/authOperations";
 
 export default function ProfileScreen() {
-  // const uploadAvatar = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       "https://pixabay.com/get/gc112d9b29705463f84b9a7df746542dbcd3b6d6b354b9e582589bc7853053eec0f011f2e664b6f759fd972a933355265_640.png"
-  //     );
+  const [dimensions, setDimensions] = useState(
+    Dimensions.get("window").width - 16 * 2
+  );
 
-  //     console.log("response", response);
-  //     const file = await response.blob();
-  //     console.log("file", file);
+  const { userAvatar } = useSelector((state) => state.auth);
 
-  //     const uniqueId = Date.now().toString();
+  const [pickedImagePath, setPickedImagePath] = useState(null);
 
-  //     await db.storage().ref(`avatar/${uniqueId}`).put(file);
+  const dispatch = useDispatch();
 
-  //     const url = await db
-  //       .storage()
-  //       .ref("avatar")
-  //       .child(uniqueId)
-  //       .getDownloadURL();
+  useEffect(() => {
+    const onChange = () => {
+      const width = Dimensions.get("window").width - 16 * 2;
+      setDimensions(width);
+    };
+    const subscription = Dimensions.addEventListener("change", onChange);
 
-  //     console.log("url", url);
-  //   } catch (error) {
-  //     console.log("error gettint avatarUrl", error.message);
-  //   }
-  // };
+    setPickedImagePath(userAvatar);
 
-  // useEffect(() => {
-  //   uploadAvatar();
-  // }, []);
+    return () => subscription?.remove();
+  }, []);
+
+  useEffect(() => {
+    setPickedImagePath(userAvatar);
+  }, [userAvatar]);
+
+  const showImagePicker = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("You've refused to allow this appp to access your photos!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      dispatch(authUpdateAvatar(result.assets[0].uri));
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text>Profile Screen</Text>
+      <ImageBackground
+        style={styles.image}
+        source={require("../../assets/images/photo-bg.jpg")}
+      >
+        <View style={styles.box}>
+          <View style={styles.avatarBox}>
+            {pickedImagePath && (
+              <Image
+                source={{ uri: pickedImagePath }}
+                style={styles.avatarImage}
+              />
+            )}
+            <TouchableOpacity
+              onPress={() => showImagePicker()}
+              style={{
+                ...styles.avatarBtn,
+                borderColor: pickedImagePath ? "#BDBDBD" : "#FF6C00",
+              }}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={{
+                  color: pickedImagePath ? "#BDBDBD" : "#FF6C00",
+                  fontSize: 13,
+                }}
+              >
+                {pickedImagePath ? "X" : "+"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ImageBackground>
     </View>
   );
 }
@@ -42,7 +105,47 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
+  },
+  image: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "flex-end",
+  },
+  box: {
+    position: "relative",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    height: "80%",
+  },
+  avatarBox: {
+    position: "absolute",
+    top: -60,
+    width: 120,
+    height: 120,
+    backgroundColor: "#F6F6F6",
+    borderRadius: 16,
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    resizeMode: "cover",
+    borderRadius: 16,
+  },
+  avatarBtn: {
+    position: "absolute",
+    right: -13,
+    bottom: 14,
     alignItems: "center",
     justifyContent: "center",
+    width: 26,
+    height: 26,
+    backgroundColor: "#FFFFFF",
+    borderRadius: "50%",
+    borderWidth: 1,
+    borderColor: "#FF6C00",
   },
 });

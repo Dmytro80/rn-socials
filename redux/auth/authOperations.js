@@ -1,29 +1,34 @@
 import db from "../../firebase/config";
 import { authSlice } from "./authReducer";
 
-const uploadAvatar = async (avatar) => {
-  const response = await fetch(avatar);
+const uploadAvatar = async (avatar, userId) => {
+  try {
+    const response = await fetch(avatar);
 
-  const file = await response.blob();
+    const file = await response.blob();
 
-  const uniqueId = Date.now().toString();
+    // const uniqueId = Date.now().toString();
 
-  await db.storage().ref(`avatar/${uniqueId}`).put(file);
+    await db.storage().ref(`avatar/${userId}`).put(file);
 
-  const url = await db.storage().ref("avatar").child(uniqueId).getDownloadURL();
+    const url = await db.storage().ref("avatar").child(userId).getDownloadURL();
 
-  return url;
+    return url;
+  } catch (error) {
+    console.log("error uploading avatarUrl", error.message);
+  }
 };
 
-const getAvatarUrl = async (photo) => {
+const getAvatarUrl = async (photo, userId) => {
   try {
     if (photo) {
-      const url = await uploadAvatar(photo);
+      const url = await uploadAvatar(photo, userId);
 
       return url;
     }
     const url = await uploadAvatar(
-      "https://pixabay.com/get/gc112d9b29705463f84b9a7df746542dbcd3b6d6b354b9e582589bc7853053eec0f011f2e664b6f759fd972a933355265_640.png"
+      "https://pixabay.com/get/gc112d9b29705463f84b9a7df746542dbcd3b6d6b354b9e582589bc7853053eec0f011f2e664b6f759fd972a933355265_640.png",
+      userId
     );
     return url;
   } catch (error) {
@@ -49,7 +54,7 @@ export const authSignUpUser =
 
       const user = await db.auth().currentUser;
 
-      const userAvatarUrl = await getAvatarUrl(pickedImagePath);
+      const userAvatarUrl = await getAvatarUrl(pickedImagePath, user.uid);
 
       await user.updateProfile({ displayName: login, photoURL: userAvatarUrl });
 
@@ -93,5 +98,25 @@ export const authStateChangeUser = () => async (dispatch, getState) => {
     });
   } catch (error) {
     console.log("error.message", error.message);
+  }
+};
+
+export const authUpdateAvatar = (newAvatar) => async (dispatch, getState) => {
+  try {
+    const user = await db.auth().currentUser;
+
+    const userAvatarUrl = await getAvatarUrl(newAvatar, user.uid);
+
+    await user.updateProfile({ photoURL: userAvatarUrl });
+
+    const { photoURL } = await db.auth().currentUser;
+
+    dispatch(
+      authSlice.actions.updateUserAvatar({
+        userAvatar: photoURL,
+      })
+    );
+  } catch (error) {
+    console.log("error updating avatar", error.message);
   }
 };
