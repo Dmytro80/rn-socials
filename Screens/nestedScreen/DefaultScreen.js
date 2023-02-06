@@ -34,6 +34,14 @@ export default function DefaultScreen({ navigation }) {
     }
   };
 
+  const incrementCountLikes = (postId) => {
+    const currentPostRef = db.firestore().collection("posts").doc(postId);
+
+    currentPostRef.update({
+      countLike: db.firestore.FieldValue.increment(1),
+    });
+  };
+
   useEffect(() => {
     const onChange = () => {
       const width = Dimensions.get("window").width - 16 * 2;
@@ -45,14 +53,6 @@ export default function DefaultScreen({ navigation }) {
 
     return () => subscription?.remove();
   }, []);
-
-  const incrementCountLikes = (postId) => {
-    const currentPostRef = db.firestore().collection("posts").doc(postId);
-
-    currentPostRef.update({
-      countLike: db.firestore.FieldValue.increment(1),
-    });
-  };
 
   return (
     <View style={styles.container}>

@@ -7,8 +7,6 @@ const uploadAvatar = async (avatar, userId) => {
 
     const file = await response.blob();
 
-    // const uniqueId = Date.now().toString();
-
     await db.storage().ref(`avatar/${userId}`).put(file);
 
     const url = await db.storage().ref("avatar").child(userId).getDownloadURL();
@@ -32,7 +30,7 @@ const getAvatarUrl = async (photo, userId) => {
     );
     return url;
   } catch (error) {
-    console.log("error gettint avatarUrl", error.message);
+    console.log("error getting avatarUrl", error.message);
   }
 };
 
@@ -42,7 +40,7 @@ export const authSignInUser =
     try {
       await db.auth().signInWithEmailAndPassword(email, password);
     } catch (error) {
-      console.log("error.message", error.message);
+      console.log("error sign in", error.message);
     }
   };
 
@@ -68,7 +66,7 @@ export const authSignUpUser =
         })
       );
     } catch (error) {
-      console.log("error.message", error.message);
+      console.log("error sign up", error.message);
     }
   };
 
@@ -78,7 +76,7 @@ export const authSignOutUser = () => async (dispatch, getState) => {
 
     dispatch(authSlice.actions.authSignOut());
   } catch (error) {
-    console.log("error.message", error.message);
+    console.log("error sign out", error.message);
   }
 };
 
@@ -97,7 +95,7 @@ export const authStateChangeUser = () => async (dispatch, getState) => {
       }
     });
   } catch (error) {
-    console.log("error.message", error.message);
+    console.log("error changing state", error.message);
   }
 };
 

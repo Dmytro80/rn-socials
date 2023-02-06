@@ -11,7 +11,7 @@ const Main = () => {
 
   useEffect(() => {
     dispatch(authStateChangeUser());
-  }, []);
+  }, [stateChange]);
 
   const routing = useRouter(stateChange);
 

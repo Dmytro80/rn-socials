@@ -148,8 +148,6 @@ export default function LoginScreen({ navigation }) {
 
       const file = await response.blob();
 
-      console.log("file in createPost", file);
-
       const postId = nanoid();
 
       await db.storage().ref(`postImage/${postId}`).put(file);
