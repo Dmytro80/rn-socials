@@ -25,7 +25,7 @@ const getAvatarUrl = async (photo, userId) => {
       return url;
     }
     const url = await uploadAvatar(
-      "https://pixabay.com/get/gc112d9b29705463f84b9a7df746542dbcd3b6d6b354b9e582589bc7853053eec0f011f2e664b6f759fd972a933355265_640.png",
+      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_150.png",
       userId
     );
     return url;

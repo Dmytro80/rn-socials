@@ -63,7 +63,7 @@ export default function RegistrationScreen({ navigation }) {
 
   const handleSubmit = async () => {
     dispatch(authSignUpUser({ ...state, pickedImagePath }));
-    console.log(state);
+
     keyboardHide();
     setState(initialState);
   };
